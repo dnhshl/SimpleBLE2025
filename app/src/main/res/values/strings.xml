@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">SimpleBLE</string>
+    <string name="mainScreenTitle">Home</string>
+    <string name="mainScreenLabel">Home</string>
+    <string name="screen2Title">Screen2</string>
+    <string name="screen2Label">screen2</string>
+    <string name="screen3Title">Screen 3</string>
+    <string name="screen3Label">screen3</string>
+    <string name="FullScreen1Title">ESP32 BLE Communication</string>
+    <string name="FullScreen2Title">Wähle Device</string>
+    <string name="menuItem1">Wähle Device</string>
+    <string name="menuItem2">Verbinde</string>
+    <string name="menuItem3">Trenne</string>
+    <string name="emptyString" />
+    <string name="permissionRational">Bitte Rechte erteilen!</string>
+    <string name="requestPermission">Rechte erteilen</string>
+    <string name="permissionRequired">Sie müssen Rechte erteilen!</string>
+</resources>
