@@ -72,7 +72,7 @@ fun FullScreen1(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Empfange Daten",
+                text = stringResource(R.string.receiveDataSwitch),
                 modifier = Modifier.weight(1f)
             )
             Switch(
@@ -91,7 +91,7 @@ fun FullScreen1(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "LED",
+                text = stringResource(R.string.ledSwitch),
                 modifier = Modifier.weight(1f)
             )
             Switch(
@@ -110,7 +110,7 @@ fun FullScreen1(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Blinken",
+                text = stringResource(R.string.blinkSwitch),
                 modifier = Modifier.weight(1f)
             )
             Switch(
@@ -148,7 +148,7 @@ fun FullScreen1(
 @Composable
 fun ConnectionStatusCard(
     advertisement: Advertisement?,
-    connectionState: Int = ConnectionState.NO_DEVICE,
+    connectionState: ConnectionState = ConnectionState.NO_DEVICE,
     viewModel: MainViewModel,
     navController: NavController
 ) {
@@ -166,15 +166,13 @@ fun ConnectionStatusCard(
             ConnectionState.NOT_CONNECTED -> Color(0xFFE57373)
             ConnectionState.CONNECTING -> Color.Yellow
             ConnectionState.CONNECTED -> Color.Green
-            else -> Color.Transparent
         }
 
         val statusMessage = when (connectionState) {
-            ConnectionState.NO_DEVICE -> ""
-            ConnectionState.NOT_CONNECTED -> "nicht verbunden"
-            ConnectionState.CONNECTING -> "Connecting ..."
-            ConnectionState.CONNECTED -> "Verbunden"
-            else -> ""
+            ConnectionState.NO_DEVICE -> stringResource(R.string.emptyString)
+            ConnectionState.NOT_CONNECTED -> stringResource(R.string.notConnected)
+            ConnectionState.CONNECTING -> stringResource(R.string.connecting)
+            ConnectionState.CONNECTED -> stringResource(R.string.connected)
         }
 
 
@@ -188,7 +186,7 @@ fun ConnectionStatusCard(
             Row {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = advertisement?.name?.toString() ?: "kein Device ausgewählt",
+                        text = advertisement?.name?.toString() ?: stringResource(R.string.noDevice),
                         style = MaterialTheme.typography.bodyLarge
                     )
                     Text(
@@ -233,14 +231,9 @@ fun ConnectionStatusCard(
                             },
                             enabled = connectionState == ConnectionState.CONNECTED
                         )
-
-
                     }
                 }
-
             }
-
-
         }
     }
 

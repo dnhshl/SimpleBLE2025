@@ -15,4 +15,16 @@
     <string name="permissionRational">Bitte Rechte erteilen!</string>
     <string name="requestPermission">Rechte erteilen</string>
     <string name="permissionRequired">Sie müssen Rechte erteilen!</string>
+    <string name="alertTitle">Verbindung trennen</string>
+    <string name="alertText">Wollen Sie die Verbindung zum Gerät trennen?</string>
+    <string name="alertConfirm">Ja</string>
+    <string name="alertDismiss">Nein</string>
+    <string name="receiveDataSwitch">Empfange Daten</string>
+    <string name="ledSwitch">LED</string>
+    <string name="blinkSwitch">Blinken</string>
+    <string name="notConnected">Nicht verbunden</string>
+    <string name="connecting">Verbinden ...</string>
+    <string name="connected">Verbunden</string>
+    <string name="noDevice">Kein Gerät ausgewählt</string>
+    <string name="noDevices">Keine Geräte gefunden</string>
 </resources>

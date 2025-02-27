@@ -9,10 +9,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.juul.kable.Advertisement
-import com.juul.kable.Peripheral
-import com.juul.kable.State
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -28,7 +25,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val datastoreManager = DatastoreManager(dataStore)
 
     private val bleRepository = BleRepository()
-    var peripheral: Peripheral? = null
+
 
     // Persistenter State
 
@@ -65,14 +62,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         // Überwache den state und triggere Aktionen bei bestimmeten Zuständen
         // Hier als Beispiel: Wenn der Counter durch 5 teilbar ist, zeige eine Snackbar
 
-        viewModelScope.launch {
-            _state.collectLatest {
-                val counter = _state.value.clickCounter
-                if (counter % 5 == 0 && counter > 0) {
-                    showSnackbar("Counter ist durch 5 teilbar")
-                }
-            }
-        }
     }
 
 
@@ -133,29 +122,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun connect(advertisement: Advertisement?) {
         if (advertisement == null) return
         viewModelScope.launch {
-            peripheral = bleRepository.connectToPeripheral(advertisement)
-            peripheral?.state?.collectLatest { connectionState ->
-                Log.i(">>>>>", "Connection State: $connectionState")
-                when (connectionState) {
-                    is State.Connected -> {
-                        _state.value =
-                            _state.value.copy(connectionState = ConnectionState.CONNECTED)
-                    }
-
-                    is State.Disconnected -> {
-                        _state.value =
-                            _state.value.copy(connectionState = ConnectionState.NOT_CONNECTED)
-                    }
-
-                    is State.Connecting -> {
-                        _state.value =
-                            _state.value.copy(connectionState = ConnectionState.CONNECTING)
-                    }
-
-                    else -> {
-                        _state.value =
-                            _state.value.copy(connectionState = ConnectionState.NO_DEVICE)
-                    }
+            viewModelScope.launch {
+                bleRepository.connectToPeripheral(advertisement)?.collectLatest { connectionState ->
+                    Log.i(">>>>>", "Connection State: $connectionState")
+                    _state.value = _state.value.copy(connectionState = connectionState)
                 }
             }
         }
@@ -163,9 +133,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun disconnect() {
         viewModelScope.launch {
-            peripheral?.disconnect()
-            delay(1000) // Add a delay to ensure the peripheral processes the disconnect
-            peripheral = null
+            bleRepository.disconnectFromPeripheral()
             _state.value = _state.value.copy(
                 connectionState = ConnectionState.NOT_CONNECTED,
                 receiveData = false
@@ -177,16 +145,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private var receiveDataJob: Job? = null
 
     fun startReceivingData() {
-        peripheral?.let {
-            receiveDataJob = viewModelScope.launch {
-                bleRepository.startReceivingData(it).collectLatest { data ->
-                    // Process the received data (e.g., log it, update UI state, etc.)
-                    Log.i(">>>>>", "Received data: ${String(data, Charsets.UTF_8)}")
-                    val jsonString = String(data, Charsets.UTF_8)
-                    val esp32DataIn = parseEsp32Data(jsonString)
-                    _state.value = _state.value.copy(esp32DataIn = esp32DataIn)
-                }
+        receiveDataJob = viewModelScope.launch {
+            bleRepository.startReceivingData()?.collectLatest { data ->
+                // Process the received data (e.g., log it, update UI state, etc.)
+                Log.i(">>>>>", "Received data: ${String(data, Charsets.UTF_8)}")
+                val jsonString = String(data, Charsets.UTF_8)
+                val esp32DataIn = parseEsp32Data(jsonString)
+                _state.value = _state.value.copy(esp32DataIn = esp32DataIn)
             }
+
         }
 
     }
@@ -198,11 +165,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun sendDataToDevice(data: Esp32DataOut) {
         if (_state.value.connectionState != ConnectionState.CONNECTED) return
-        peripheral?.let {
-            viewModelScope.launch {
-                bleRepository.sendData(it, data)
-            }
+
+        viewModelScope.launch {
+            bleRepository.sendData(data)
         }
+
     }
 
     // Ab hier Helper Funktionen
@@ -243,10 +210,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     // beim Beenden des ViewModels
+    // -----------------------------------------------------------------------------
 
     override fun onCleared() {
         super.onCleared()
-        // Add your disconnection logic here
         disconnect()
     }
 

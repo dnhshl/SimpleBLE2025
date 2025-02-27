@@ -4,7 +4,9 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
+import com.example.main.R
 import com.example.main.model.MainViewModel
 
 @Composable
@@ -14,8 +16,8 @@ fun AlertDialogScreen(
 ) {
 
     AlertDialog(
-        title = { Text("Verbindung trennen?") },
-        text = { Text("Wollen Sie die Verbindung zum Gerät trennen?") },
+        title = { Text(stringResource(R.string.alertTitle)) },
+        text = { Text(stringResource(R.string.alertText)) },
         onDismissRequest = {
             navController.popBackStack()
         },
@@ -25,7 +27,7 @@ fun AlertDialogScreen(
                     viewModel.disconnect()
                     navController.popBackStack()
                 }) {
-                Text("Ja")
+                Text(stringResource(R.string.alertConfirm))
             }
         },
         dismissButton = {
@@ -33,7 +35,7 @@ fun AlertDialogScreen(
                 onClick = {
                     navController.popBackStack()
                 }) {
-                Text("Nein")
+                Text(stringResource(R.string.alertDismiss))
             }
         }
     )
