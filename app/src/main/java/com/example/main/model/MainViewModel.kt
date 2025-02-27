@@ -8,13 +8,10 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.juul.kable.Advertisement
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json.Default.decodeFromString
 
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
@@ -24,7 +21,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val dataStore = application.dataStore
     private val datastoreManager = DatastoreManager(dataStore)
 
-    private val bleRepository = BleRepository()
 
 
     // Persistenter State
@@ -68,120 +64,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     // Actions
     // ------------------------------------------------------------------------------
 
-    fun setReceiveData(receiveData: Boolean) {
-        _state.value = _state.value.copy(receiveData = receiveData)
-        if (receiveData) startReceivingData() else stopReceivingData()
-    }
 
-    fun setLed(led: Boolean) {
-        _state.value = _state.value.copy(led = led)
-        sendDataToDevice(Esp32DataOut(if (led) "H" else "L", _state.value.blink))
-    }
-
-    fun setBlink(blink: Boolean) {
-        _state.value = _state.value.copy(blink = blink)
-        sendDataToDevice(Esp32DataOut(if (_state.value.led) "H" else "L", blink))
-    }
-
-
-    // BLE Repository instance for scanning
-
-    // Job reference for the scanning collection
-    private var scanJob: Job? = null
-
-    fun startDeviceScan() {
-        scanJob = viewModelScope.launch {
-            bleRepository.scanAdvertisements().collect { advertisement ->
-                // Process the received advertisement (e.g., log it, update UI state, etc.)
-                // Convert advertisement to peripheral
-
-                val currentAds = _state.value.advertisements
-                if (currentAds.none { it.identifier == advertisement.identifier }) {
-                    _state.value = _state.value.copy(advertisements = currentAds + advertisement)
-                }
-                Log.i(">>>>>", "Scan ${state.value.advertisements}")
-
-            }
-        }
-    }
-
-    fun stopDeviceScan() {
-        scanJob?.cancel()
-        scanJob = null
-    }
-
-    fun setSelectedAdvertisement(advertisement: Advertisement) {
-        _state.value = _state.value.copy(
-            selectedAdvertisement = advertisement,
-            connectionState = ConnectionState.NOT_CONNECTED
-        )
-    }
-
-
-    // Verbindung aufbauen
-    fun connect(advertisement: Advertisement?) {
-        if (advertisement == null) return
-        viewModelScope.launch {
-            viewModelScope.launch {
-                bleRepository.connectToPeripheral(advertisement)?.collectLatest { connectionState ->
-                    Log.i(">>>>>", "Connection State: $connectionState")
-                    _state.value = _state.value.copy(connectionState = connectionState)
-                }
-            }
-        }
-    }
-
-    fun disconnect() {
-        viewModelScope.launch {
-            bleRepository.disconnectFromPeripheral()
-            _state.value = _state.value.copy(
-                connectionState = ConnectionState.NOT_CONNECTED,
-                receiveData = false
-            )
-        }
-    }
-
-
-    private var receiveDataJob: Job? = null
-
-    fun startReceivingData() {
-        receiveDataJob = viewModelScope.launch {
-            bleRepository.startReceivingData()?.collectLatest { data ->
-                // Process the received data (e.g., log it, update UI state, etc.)
-                Log.i(">>>>>", "Received data: ${String(data, Charsets.UTF_8)}")
-                val jsonString = String(data, Charsets.UTF_8)
-                val esp32DataIn = parseEsp32Data(jsonString)
-                _state.value = _state.value.copy(esp32DataIn = esp32DataIn)
-            }
-
-        }
-
-    }
-
-    fun stopReceivingData() {
-        receiveDataJob?.cancel()
-        receiveDataJob = null
-    }
-
-    fun sendDataToDevice(data: Esp32DataOut) {
-        if (_state.value.connectionState != ConnectionState.CONNECTED) return
-
-        viewModelScope.launch {
-            bleRepository.sendData(data)
-        }
-
-    }
 
     // Ab hier Helper Funktionen
     // ------------------------------------------------------------------------------
-
-    private fun parseEsp32Data(jsonString: String): Esp32DataIn? {
-        return try {
-            decodeFromString<Esp32DataIn>(jsonString)
-        } catch (e: Exception) {
-            null
-        }
-    }
 
 
     // Snackbar
@@ -209,12 +95,5 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         return getApplication<Application>().getString(resId)
     }
 
-    // beim Beenden des ViewModels
-    // -----------------------------------------------------------------------------
-
-    override fun onCleared() {
-        super.onCleared()
-        disconnect()
-    }
 
 }

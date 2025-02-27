@@ -24,7 +24,6 @@ fun AlertDialogScreen(
         confirmButton = {
             TextButton(
                 onClick = {
-                    viewModel.disconnect()
                     navController.popBackStack()
                 }) {
                 Text(stringResource(R.string.alertConfirm))
