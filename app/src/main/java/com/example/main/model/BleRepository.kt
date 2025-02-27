@@ -59,8 +59,6 @@ class BleRepository {
 
     private var peripheral: Peripheral? = null
 
-    private val _connectionState = MutableStateFlow<ConnectionState>(ConnectionState.NO_DEVICE)
-    val connectionState: StateFlow<ConnectionState> get() = _connectionState
 
     /**
      * Function to obtain a Flow of advertisements.
@@ -98,7 +96,7 @@ class BleRepository {
                 is State.Connecting -> ConnectionState.CONNECTING
                 else -> ConnectionState.NO_DEVICE
             }
-        }?.onEach { _connectionState.value = it }
+        }
     }
 
     /**
