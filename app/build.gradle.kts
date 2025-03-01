@@ -43,7 +43,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.simpleble2025"
+        applicationId = "com.example.simplemqtt2025"
         minSdk = 29
         targetSdk = 35
         versionCode = 1

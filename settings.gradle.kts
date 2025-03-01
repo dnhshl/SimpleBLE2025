@@ -21,6 +21,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "SimpleBLE2025"
+rootProject.name = "SimpleMQTT2025"
 include(":app")
  

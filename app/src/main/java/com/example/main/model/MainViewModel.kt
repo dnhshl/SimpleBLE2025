@@ -22,7 +22,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val dataStore = application.dataStore
     private val datastoreManager = DatastoreManager(dataStore)
 
-    private val communicationRepository = BleRepository()
+    private val communicationRepository = MqttRepository(application)
 
 
     // Persistenter State

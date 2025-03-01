@@ -19,7 +19,7 @@ data class Device(
     val title: String,                      // Name des Geräts zur Anzeige
     val subtitle: String,                   // Zusätzliche Informationen zur Anzeige
     val id: String,                         // eindeutige id des Geräts
-    val advertisement: Advertisement        // Systeminformationen des Geräts
+    val advertisement: Advertisement? = null // Systeminfo für BLE Peripheral
 )
 
 // Persistenter UI-Zustand

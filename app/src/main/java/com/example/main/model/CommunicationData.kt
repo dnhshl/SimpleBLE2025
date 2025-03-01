@@ -25,3 +25,7 @@ data class Esp32DataOut(
     val LED: String,
     val LEDBlinken: Boolean
 )
+
+const val MQTT_BROKER = "broker.mqtt.cool:1883"
+val MQTT_CLIENT_ID = java.util.UUID.randomUUID().toString()
+const val MQTT_MAIN_TOPIC= "59z83bq"
