@@ -16,9 +16,6 @@ import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 
-/**
- * Repository class for handling BLE operations.
- */
 @OptIn(ExperimentalUuidApi::class)
 class BleRepository {
 
@@ -33,12 +30,7 @@ class BleRepository {
     private var peripheral: Peripheral? = null
 
 
-    /**
-     * Function to obtain a Flow of advertisements.
-     * Scanning starts when the Flow is collected and stops when collection is terminated.
-     *
-     * @return Flow of Advertisement objects.
-     */
+
     fun collectDeviceInfo(): Flow<Device> {
         return Scanner {
             filters {
@@ -57,12 +49,7 @@ class BleRepository {
     }
 
 
-    /**
-     * Connects to a peripheral using the provided advertisement.
-     *
-     * @param advertisement The Advertisement object to connect to.
-     * @return Flow of ConnectionState representing the connection state.
-     */
+
     suspend fun connect(device: Device): Flow<ConnectionState>? {
         peripheral = Peripheral(device.advertisement) {
             onServicesDiscovered {
@@ -80,20 +67,14 @@ class BleRepository {
         }
     }
 
-    /**
-     * Disconnects from the currently connected peripheral.
-     */
+
     suspend fun disconnect() {
         peripheral?.disconnect()
         delay(500) // Add a delay to ensure the peripheral processes the disconnect
         peripheral = null
     }
 
-    /**
-     * Starts receiving data from the connected peripheral.
-     *
-     * @return Flow of ByteArray representing the received data.
-     */
+
     fun receiveData(): Flow<Esp32DataIn?>? {
         return peripheral?.observe(customEsp32Characteristic)?.map { data ->
             val jsonString = String(data, Charsets.UTF_8)
@@ -105,12 +86,6 @@ class BleRepository {
         }
     }
 
-
-    /**
-     * Sends data to the connected peripheral.
-     *
-     * @param data The Esp32DataOut object to send.
-     */
     suspend fun sendData(data: Esp32DataOut) {
         val jsonString = Json.encodeToString(data)
         val dataAsByteArray = jsonString.toByteArray(Charsets.UTF_8)
