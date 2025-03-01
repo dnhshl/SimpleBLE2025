@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.Json.Default.decodeFromString
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -113,9 +114,17 @@ class BleRepository {
      *
      * @return Flow of ByteArray representing the received data.
      */
-    fun startReceivingData(): Flow<ByteArray>? {
-        return peripheral?.observe(customEsp32Characteristic)
+    fun receiveData(): Flow<Esp32DataIn?>? {
+        return peripheral?.observe(customEsp32Characteristic)?.map { data ->
+            val jsonString = String(data, Charsets.UTF_8)
+            try {
+                decodeFromString<Esp32DataIn>(jsonString)
+            } catch (e: Exception) {
+                null
+            }
+        }
     }
+
 
     /**
      * Sends data to the connected peripheral.

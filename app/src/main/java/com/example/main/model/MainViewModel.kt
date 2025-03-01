@@ -146,16 +146,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun startReceivingData() {
         receiveDataJob = viewModelScope.launch {
-            bleRepository.startReceivingData()?.collectLatest { data ->
-                // Process the received data (e.g., log it, update UI state, etc.)
-                Log.i(">>>>>", "Received data: ${String(data, Charsets.UTF_8)}")
-                val jsonString = String(data, Charsets.UTF_8)
-                val esp32DataIn = parseEsp32Data(jsonString)
-                _state.value = _state.value.copy(esp32DataIn = esp32DataIn)
+            bleRepository.receiveData()?.collectLatest { data ->
+                _state.value = _state.value.copy(esp32DataIn = data)
             }
-
         }
-
     }
 
     fun stopReceivingData() {
@@ -163,25 +157,17 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         receiveDataJob = null
     }
 
-    fun sendDataToDevice(data: Esp32DataOut) {
+    private fun sendDataToDevice(data: Esp32DataOut) {
         if (_state.value.connectionState != ConnectionState.CONNECTED) return
 
         viewModelScope.launch {
             bleRepository.sendData(data)
         }
-
     }
 
     // Ab hier Helper Funktionen
     // ------------------------------------------------------------------------------
 
-    private fun parseEsp32Data(jsonString: String): Esp32DataIn? {
-        return try {
-            decodeFromString<Esp32DataIn>(jsonString)
-        } catch (e: Exception) {
-            null
-        }
-    }
 
 
     // Snackbar
