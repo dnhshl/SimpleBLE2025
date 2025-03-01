@@ -1,5 +1,6 @@
 package com.example.main.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -125,11 +126,15 @@ fun FullScreen1(
                 .padding(4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            val title = selectedAdvertisement?.name ?: stringResource(R.string.noDevice)
+            val subtitle = selectedAdvertisement?.identifier ?: ""
             ConnectionStatusCard(
-                advertisement = selectedAdvertisement,
+                title = title,
+                subtitle = subtitle,
                 connectionState = connectionState,
-                viewModel = viewModel,
-                navController = navController
+                onClickSelect = { navController.navigate(MyScreens.FullScreen2.route) },
+                onClickConnect = { viewModel.connect(selectedAdvertisement) },
+                onClickDisconnect = { viewModel.disconnect() },
             )
         }
 
@@ -147,10 +152,12 @@ fun FullScreen1(
 
 @Composable
 fun ConnectionStatusCard(
-    advertisement: Advertisement?,
+    title: String,
+    subtitle: String,
     connectionState: ConnectionState = ConnectionState.NO_DEVICE,
-    viewModel: MainViewModel,
-    navController: NavController
+    onClickConnect: () -> Unit = {},
+    onClickDisconnect: () -> Unit = {},
+    onClickSelect: () -> Unit = {},
 ) {
     // Menu State
     var expanded by remember { mutableStateOf(false) }
@@ -186,11 +193,11 @@ fun ConnectionStatusCard(
             Row {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = advertisement?.name?.toString() ?: stringResource(R.string.noDevice),
+                        text = title,
                         style = MaterialTheme.typography.bodyLarge
                     )
                     Text(
-                        text = advertisement?.identifier?.toString() ?: "",
+                        text = subtitle,
                         style = MaterialTheme.typography.bodySmall
                     )
                     Spacer(modifier=Modifier.height(4.dp))
@@ -209,7 +216,7 @@ fun ConnectionStatusCard(
                         DropdownMenuItem(
                             text = { Text(stringResource(id = R.string.menuItem1)) },
                             onClick = {
-                                navController.navigate(MyScreens.FullScreen2.route)
+                                onClickSelect()
                                 expanded = false
                             },
                             enabled = connectionState == ConnectionState.NO_DEVICE
@@ -218,7 +225,7 @@ fun ConnectionStatusCard(
                         DropdownMenuItem(
                             text = { Text(stringResource(id = R.string.menuItem2)) },
                             onClick = {
-                                viewModel.connect(advertisement = advertisement)
+                                onClickConnect()
                                 expanded = false
                             },
                             enabled = connectionState == ConnectionState.NOT_CONNECTED
@@ -226,7 +233,7 @@ fun ConnectionStatusCard(
                         DropdownMenuItem(
                             text = { Text(stringResource(id = R.string.menuItem3)) },
                             onClick = {
-                                navController.navigate(MyScreens.AlertDialog.route)
+                                onClickDisconnect()
                                 expanded = false
                             },
                             enabled = connectionState == ConnectionState.CONNECTED

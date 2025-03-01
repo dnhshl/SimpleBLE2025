@@ -93,6 +93,8 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.accompanist.permissons)
     implementation(libs.play.services.location)
+    implementation(libs.eclipse.paho.mqtt)
+    implementation(libs.eclipse.paho.android.service)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

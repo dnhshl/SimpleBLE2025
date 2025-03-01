@@ -14,6 +14,8 @@ compose-navigation = "2.8.6"
 kable = "0.36.0"
 accompanist = "0.37.1"
 playServicesLocation = "21.3.0"
+mqttv3 = "1.1.0"
+pahoAndroidService = "1.1.1"
 
 
 
@@ -42,6 +44,10 @@ androidx-navigation-compose = { group = "androidx.navigation", name = "navigatio
 kable-core = { group = "com.juul.kable", name = "kable-core", version.ref = "kable" }
 accompanist-permissons = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanist" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
+eclipse-paho-mqtt = { group = "org.eclipse.paho", name = "org.eclipse.paho.client.mqttv3", version.ref = "mqttv3" }
+eclipse-paho-android-service = { group = "org.eclipse.paho", name = "org.eclipse.paho.android.service", version.ref = "pahoAndroidService" }
+
+
 
 
 [plugins]
