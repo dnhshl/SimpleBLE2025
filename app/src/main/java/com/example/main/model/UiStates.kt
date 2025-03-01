@@ -16,10 +16,10 @@ enum class  ConnectionState {
 }
 
 data class Device(
-    val title: String,                      // Name des Geräts zur Anzeige
-    val subtitle: String,                   // Zusätzliche Informationen zur Anzeige
-    val id: String,                         // eindeutige id des Geräts
-    val advertisement: Advertisement        // Systeminformationen des Geräts
+    val title: String,                        // Name des Geräts zur Anzeige
+    val subtitle: String,                     // Zusätzliche Informationen zur Anzeige
+    val id: String,                           // eindeutige id des Geräts
+    val advertisement: Advertisement? = null  // Systeminformationen des Geräts
 )
 
 // Persistenter UI-Zustand

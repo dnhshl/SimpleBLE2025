@@ -52,6 +52,7 @@ class BleRepository {
 
 
     suspend fun connect(device: Device): Flow<ConnectionState>? {
+        device.advertisement ?: return null
         peripheral = Peripheral(device.advertisement) {
             onServicesDiscovered {
                 requestMtu(512)
