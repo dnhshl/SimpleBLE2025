@@ -26,7 +26,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.main.R
 import com.example.main.model.MainViewModel
-import com.juul.kable.Advertisement
 
 
 @Composable
@@ -36,13 +35,13 @@ fun FullScreen2(
 ) {
 
     val state by viewModel.state.collectAsState()
-    val advertisements = state.advertisements
-    val selectedAdvertisement = state.selectedAdvertisement
+    val devices = state.devices
+    val selectedDevice = state.selectedDevice
 
     LaunchedEffect(Unit) {
-        viewModel.startDeviceScan()
+        viewModel.startCollectDevices()
         kotlinx.coroutines.delay(5000)
-        viewModel.stopDeviceScan()
+        viewModel.stopCollectDevices()
     }
 
     Column(
@@ -51,19 +50,20 @@ fun FullScreen2(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        if (advertisements.isNotEmpty()) {
+        if (devices.isNotEmpty()) {
             LazyColumn(
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
                     .fillMaxWidth()
                     .weight(1f)
             ) {
-                items(advertisements) { advertisement ->
+                items(devices) { device ->
                     ListItemCard(
-                        advertisement = advertisement,
-                        isSelected = (selectedAdvertisement == advertisement),
+                        title = device.title,
+                        subtitle = device.subtitle,
+                        isSelected = (selectedDevice?.id == device.id),
                         onItemClick = {
-                            viewModel.setSelectedAdvertisement(advertisement)
+                            viewModel.setSelectedDevice(device)
                             navController.popBackStack()
                         },
                     )
@@ -78,7 +78,8 @@ fun FullScreen2(
 
 @Composable
 fun ListItemCard(
-    advertisement: Advertisement,
+    title: String,
+    subtitle: String,
     isSelected: Boolean = false,
     onItemClick: () -> Unit,
 ) {
@@ -100,10 +101,10 @@ fun ListItemCard(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = advertisement.name.toString(),
+                    text = title,
                     style = MaterialTheme.typography.bodyLarge
                 )
-                Text(text = advertisement.identifier, style = MaterialTheme.typography.bodySmall)
+                Text(text = subtitle, style = MaterialTheme.typography.bodySmall)
             }
         }
     }

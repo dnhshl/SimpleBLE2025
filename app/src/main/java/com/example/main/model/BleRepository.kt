@@ -1,7 +1,6 @@
 package com.example.main.model
 
 import android.util.Log
-import com.juul.kable.Advertisement
 import com.juul.kable.Peripheral
 import com.juul.kable.Scanner
 import com.juul.kable.State
@@ -9,11 +8,7 @@ import com.juul.kable.WriteType
 import com.juul.kable.characteristicOf
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.Json.Default.decodeFromString
@@ -44,15 +39,23 @@ class BleRepository {
      *
      * @return Flow of Advertisement objects.
      */
-    fun scanAdvertisements(): Flow<Advertisement> {
+    fun collectDeviceInfo(): Flow<Device> {
         return Scanner {
             filters {
                 match {
                     services = listOf(customServiceUuid)
                 }
             }
-        }.advertisements
+        }.advertisements.map {it ->
+            Device(
+                title = it.name.toString(),
+                subtitle = it.identifier,
+                id = it.identifier,
+                advertisement = it
+            )
+        }
     }
+
 
     /**
      * Connects to a peripheral using the provided advertisement.
@@ -60,8 +63,8 @@ class BleRepository {
      * @param advertisement The Advertisement object to connect to.
      * @return Flow of ConnectionState representing the connection state.
      */
-    suspend fun connectToPeripheral(advertisement: Advertisement): Flow<ConnectionState>? {
-        peripheral = Peripheral(advertisement) {
+    suspend fun connect(device: Device): Flow<ConnectionState>? {
+        peripheral = Peripheral(device.advertisement) {
             onServicesDiscovered {
                 requestMtu(512)
             }
@@ -80,7 +83,7 @@ class BleRepository {
     /**
      * Disconnects from the currently connected peripheral.
      */
-    suspend fun disconnectFromPeripheral() {
+    suspend fun disconnect() {
         peripheral?.disconnect()
         delay(500) // Add a delay to ensure the peripheral processes the disconnect
         peripheral = null

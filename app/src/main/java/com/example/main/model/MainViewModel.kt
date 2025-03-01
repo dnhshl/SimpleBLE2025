@@ -8,13 +8,11 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.juul.kable.Advertisement
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json.Default.decodeFromString
 
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
@@ -24,7 +22,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val dataStore = application.dataStore
     private val datastoreManager = DatastoreManager(dataStore)
 
-    private val bleRepository = BleRepository()
+    private val communicationRepository = BleRepository()
 
 
     // Persistenter State
@@ -89,41 +87,40 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     // Job reference for the scanning collection
     private var scanJob: Job? = null
 
-    fun startDeviceScan() {
+    fun startCollectDevices() {
         scanJob = viewModelScope.launch {
-            bleRepository.scanAdvertisements().collect { advertisement ->
+            communicationRepository.collectDeviceInfo().collect { device ->
                 // Process the received advertisement (e.g., log it, update UI state, etc.)
                 // Convert advertisement to peripheral
 
-                val currentAds = _state.value.advertisements
-                if (currentAds.none { it.identifier == advertisement.identifier }) {
-                    _state.value = _state.value.copy(advertisements = currentAds + advertisement)
+                val currentDevices = _state.value.devices
+                if (currentDevices.none { it.id == device.id }) {
+                    _state.value = _state.value.copy(devices = currentDevices + device)
                 }
-                Log.i(">>>>>", "Scan ${state.value.advertisements}")
-
+                Log.i(">>>>>", "Scan ${state.value.devices}")
             }
         }
     }
 
-    fun stopDeviceScan() {
+    fun stopCollectDevices() {
         scanJob?.cancel()
         scanJob = null
     }
 
-    fun setSelectedAdvertisement(advertisement: Advertisement) {
+    fun setSelectedDevice(device: Device) {
         _state.value = _state.value.copy(
-            selectedAdvertisement = advertisement,
+            selectedDevice = device,
             connectionState = ConnectionState.NOT_CONNECTED
         )
     }
 
 
     // Verbindung aufbauen
-    fun connect(advertisement: Advertisement?) {
-        if (advertisement == null) return
+    fun connect(device: Device?) {
+        device ?: return
         viewModelScope.launch {
             viewModelScope.launch {
-                bleRepository.connectToPeripheral(advertisement)?.collectLatest { connectionState ->
+                communicationRepository.connect(device)?.collectLatest { connectionState ->
                     Log.i(">>>>>", "Connection State: $connectionState")
                     _state.value = _state.value.copy(connectionState = connectionState)
                 }
@@ -133,7 +130,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun disconnect() {
         viewModelScope.launch {
-            bleRepository.disconnectFromPeripheral()
+            communicationRepository.disconnect()
             _state.value = _state.value.copy(
                 connectionState = ConnectionState.NOT_CONNECTED,
                 receiveData = false
@@ -146,7 +143,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun startReceivingData() {
         receiveDataJob = viewModelScope.launch {
-            bleRepository.receiveData()?.collectLatest { data ->
+            communicationRepository.receiveData()?.collectLatest { data ->
                 _state.value = _state.value.copy(esp32DataIn = data)
             }
         }
@@ -161,7 +158,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         if (_state.value.connectionState != ConnectionState.CONNECTED) return
 
         viewModelScope.launch {
-            bleRepository.sendData(data)
+            communicationRepository.sendData(data)
         }
     }
 

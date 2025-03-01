@@ -1,6 +1,5 @@
 package com.example.main.ui.screens
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -39,7 +38,6 @@ import androidx.navigation.NavController
 import com.example.main.R
 import com.example.main.model.ConnectionState
 import com.example.main.model.MainViewModel
-import com.juul.kable.Advertisement
 
 
 @Composable
@@ -48,7 +46,7 @@ fun FullScreen1(
     navController: NavController,
 ) {
     val state by viewModel.state.collectAsState()
-    val selectedAdvertisement = state.selectedAdvertisement
+    val selectedDevice = state.selectedDevice
     val connectionState = state.connectionState
     val receiveData = state.receiveData
     val led = state.led
@@ -126,14 +124,14 @@ fun FullScreen1(
                 .padding(4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            val title = selectedAdvertisement?.name ?: stringResource(R.string.noDevice)
-            val subtitle = selectedAdvertisement?.identifier ?: ""
+            val title = selectedDevice?.title ?: stringResource(R.string.noDevice)
+            val subtitle = selectedDevice?.subtitle ?: ""
             ConnectionStatusCard(
                 title = title,
                 subtitle = subtitle,
                 connectionState = connectionState,
                 onClickSelect = { navController.navigate(MyScreens.FullScreen2.route) },
-                onClickConnect = { viewModel.connect(selectedAdvertisement) },
+                onClickConnect = { viewModel.connect(selectedDevice) },
                 onClickDisconnect = { viewModel.disconnect() },
             )
         }
@@ -243,5 +241,4 @@ fun ConnectionStatusCard(
             }
         }
     }
-
 }
