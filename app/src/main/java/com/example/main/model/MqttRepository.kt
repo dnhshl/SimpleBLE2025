@@ -19,30 +19,58 @@ import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence
 import java.io.File
 import kotlin.text.Charsets.UTF_8
 
+
+const val MQTT_BROKER = "tcp://broker.mqtt.cool:1883"
+const val MQTT_MAIN_TOPIC= "59z83bq"
+
 class MqttRepository(private val context: Context) {
 
-    private val brokerUrl = "tcp://$MQTT_BROKER"
-    private val clientId = MQTT_CLIENT_ID
+    private val client_id = java.util.UUID.randomUUID().toString()
     private var topicIn = ""
     private var topicOut = ""
     private var mqttClient: MqttClient? = null
-    private var esp32ClientId = ""
 
     private val _mqttState = MutableStateFlow<ConnectionState>(ConnectionState.NOT_CONNECTED)
     val mqttState: Flow<ConnectionState> get() = _mqttState
 
+    // Flow der eingehenden Nachrichten
     private val _incomingMessages = MutableStateFlow<Esp32DataIn?>(null)
     val incomingMessages: Flow<Esp32DataIn?> get() = _incomingMessages
 
+    // Funktion, die aufgerufen wird, wenn eine Nachricht eintrifft
+    // und die Nachricht dekodiert und in den Flow _incomingMessages schreibt
+    private fun onMessageArrive(topic: String?, message: MqttMessage?) {
+        message?.payload?.let {
+            val jsonString = String(it, UTF_8)
+            try {
+                val data = decodeFromString<Esp32DataIn>(jsonString)
+                _incomingMessages.value = data
+            } catch (e: Exception) {
+                _incomingMessages.value = null
+                Log.e("MqttRepository", "Failed to decode message", e)
+            }
+        }
+    }
+
+    // Flow über definierte Schnittstelle der App bereitstellen
+    fun receiveData(): Flow<Esp32DataIn?> {
+        return incomingMessages
+    }
+
 
     fun collectDeviceInfo(): Flow<Device> {
-        val espDevices = listOf("esp32-1", "esp32-2", "esp32-3")
-        return espDevices.map { Device(title = it, subtitle = "", id = it) }.asFlow()
+        val espDevices = listOf(
+            Device(title = "Anjas ESP", subtitle = "da geht was", id = "esp32-1-abc39xy"),
+            Device(title = "Willis ESP", subtitle = "auch schön", id = "esp32-1-cde45fg"),
+            Device(title = "Franzis ESP", subtitle = "warum nicht", id = "esp32-1-xyz12ab"),
+        )
+        return espDevices.asFlow()
     }
 
 
     fun connect(device: Device): Flow<ConnectionState> {
         try {
+            // Zugriff auf internen Speicher zur Ablage von Verwaltungsinfos
             val persistenceDir = File(context.filesDir, "mqtt-persistence")
             if (!persistenceDir.exists()) {
                 if (!persistenceDir.mkdirs()) {
@@ -51,34 +79,35 @@ class MqttRepository(private val context: Context) {
             }
             val persistence = MqttDefaultFilePersistence(persistenceDir.absolutePath)
 
-            esp32ClientId = device.id
+            // Topics für die Kommunikation festlegen
+            val esp32ClientId = device.id
             topicOut = "$MQTT_MAIN_TOPIC/$esp32ClientId/config"
             topicIn = "$MQTT_MAIN_TOPIC/$esp32ClientId/data"
 
-            mqttClient = MqttClient(brokerUrl, clientId, persistence)
+            // MQTT-Client initialisieren
+            mqttClient = MqttClient(MQTT_BROKER, client_id, persistence)
+
+            // Callback für eingehende Nachrichten setzen
             mqttClient?.setCallback(object : MqttCallback {
+                // Was passiert, wenn die Verbindung verloren geht?
                 override fun connectionLost(cause: Throwable?) {
                     _mqttState.value = ConnectionState.NOT_CONNECTED
                 }
 
-                override fun messageArrived(topicIn: String?, message: MqttMessage?) {
-                    message?.payload?.let {
-                        val jsonString = String(it, UTF_8)
-                        try {
-                            val data = decodeFromString<Esp32DataIn>(jsonString)
-                            _incomingMessages.value = data
-                        } catch (e: Exception) {
-                            _incomingMessages.value = null
-                            Log.e("MqttRepository", "Failed to decode message", e)
-                        }
-                    }
+                // Was passiert, wenn eine Nachricht eintrifft?
+                override fun messageArrived(topic: String?, message: MqttMessage?) {
+                    onMessageArrive(topic, message)
                 }
 
+                // Was passiert, wenn eine Nachricht ausgeliefert wurde?
                 override fun deliveryComplete(token: IMqttDeliveryToken?) {}
             })
-            val options = MqttConnectOptions()
-            mqttClient?.connect(options)
+
+            // verbinden
+            mqttClient?.connect()
+            // topic subscriben
             mqttClient?.subscribe(topicIn)
+            // Verbindungsstatus aktualisieren
             _mqttState.value = ConnectionState.CONNECTED
         } catch (e: MqttException) {
             // Handle MQTT-specific exceptions
@@ -99,9 +128,5 @@ class MqttRepository(private val context: Context) {
         val jsonString = Json.encodeToString(data)
         val message = MqttMessage(jsonString.toByteArray(UTF_8))
         mqttClient?.publish(topicOut, message)
-    }
-
-    fun receiveData(): Flow<Esp32DataIn?> {
-        return incomingMessages
     }
 }
