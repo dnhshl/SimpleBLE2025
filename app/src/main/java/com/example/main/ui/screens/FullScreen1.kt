@@ -34,6 +34,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.main.R
 import com.example.main.model.ConnectionState
@@ -45,7 +46,7 @@ fun FullScreen1(
     viewModel: MainViewModel,
     navController: NavController,
 ) {
-    val state by viewModel.state.collectAsState()
+    val state by viewModel.state.collectAsStateWithLifecycle()
     val selectedDevice = state.selectedDevice
     val connectionState = state.connectionState
     val receiveData = state.receiveData

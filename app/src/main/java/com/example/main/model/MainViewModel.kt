@@ -12,6 +12,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 
@@ -67,17 +68,17 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     // ------------------------------------------------------------------------------
 
     fun setReceiveData(receiveData: Boolean) {
-        _state.value = _state.value.copy(receiveData = receiveData)
+        _state.update { it.copy(receiveData = receiveData) }
         if (receiveData) startReceivingData() else stopReceivingData()
     }
 
     fun setLed(led: Boolean) {
-        _state.value = _state.value.copy(led = led)
+        _state.update { it.copy(led = led) }
         sendDataToDevice(Esp32DataOut(if (led) "H" else "L", _state.value.blink))
     }
 
     fun setBlink(blink: Boolean) {
-        _state.value = _state.value.copy(blink = blink)
+        _state.update { it.copy(blink = blink) }
         sendDataToDevice(Esp32DataOut(if (_state.value.led) "H" else "L", blink))
     }
 
@@ -95,7 +96,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
                 val currentDevices = _state.value.devices
                 if (currentDevices.none { it.id == device.id }) {
-                    _state.value = _state.value.copy(devices = currentDevices + device)
+                    _state.update { it.copy(devices = currentDevices + device) }
                 }
                 Log.i(">>>>>", "Scan ${state.value.devices}")
             }
@@ -108,10 +109,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun setSelectedDevice(device: Device) {
-        _state.value = _state.value.copy(
+        _state.update { it.copy(
             selectedDevice = device,
             connectionState = ConnectionState.NOT_CONNECTED
-        )
+        ) }
     }
 
 
@@ -122,7 +123,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             viewModelScope.launch {
                 communicationRepository.connect(device)?.collectLatest { connectionState ->
                     Log.i(">>>>>", "Connection State: $connectionState")
-                    _state.value = _state.value.copy(connectionState = connectionState)
+                    _state.update { it.copy(connectionState = connectionState) }
                 }
             }
         }
@@ -131,10 +132,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun disconnect() {
         viewModelScope.launch {
             communicationRepository.disconnect()
-            _state.value = _state.value.copy(
+            _state.update { it.copy(
                 connectionState = ConnectionState.NOT_CONNECTED,
                 receiveData = false
-            )
+            ) }
         }
     }
 
@@ -144,7 +145,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun startReceivingData() {
         receiveDataJob = viewModelScope.launch {
             communicationRepository.receiveData()?.collectLatest { data ->
-                _state.value = _state.value.copy(esp32DataIn = data)
+                _state.update { it.copy(esp32DataIn = data) }
             }
         }
     }
