@@ -2,7 +2,7 @@ package com.example.main.model
 
 import android.app.Application
 import android.content.Context
-import android.nfc.NdefMessage
+import android.nfc.NfcAdapter
 import android.util.Log
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
@@ -62,8 +62,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
 
-
         // Überwache den NFC-Datenstrom
+        checkNfcStatus()
         viewModelScope.launch {
             NfcRepository.nfcData.collectLatest {  nfcdata ->
                 Log.i(">>>>>", "NFC Data: $nfcdata")
@@ -81,6 +81,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
                 Log.i(">>>>>", "NFC Data: $nfcdata")
             }
+
+
         }
 
         // Überwache den state und triggere Aktionen bei bestimmeten Zuständen
@@ -191,6 +193,19 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     // Ab hier Helper Funktionen
     // ------------------------------------------------------------------------------
 
+    private fun checkNfcStatus() {
+        val nfcAdapter = NfcAdapter.getDefaultAdapter(getApplication())
+        if (nfcAdapter == null) {
+            _state.update { it.copy(nfcState = NfcState.NFC_NOT_SUPPORTED) }
+            showSnackbar(getStringRessource(R.string.nfc_not_supported))
+        } else if (!nfcAdapter.isEnabled) {
+            _state.update { it.copy(nfcState = NfcState.NFC_DISABLED) }
+            showSnackbar(getStringRessource(R.string.nfc_disabled))
+        } else {
+            _state.update { it.copy(nfcState = NfcState.NFC_ENABLED) }
+            showSnackbar(getStringRessource(R.string.nfc_enabled))
+        }
+    }
 
 
     // Snackbar

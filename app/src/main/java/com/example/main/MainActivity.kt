@@ -2,9 +2,7 @@ package com.example.main
 
 import android.app.PendingIntent
 import android.content.Intent
-import android.nfc.NdefMessage
 import android.nfc.NfcAdapter
-import android.nfc.Tag
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -13,10 +11,6 @@ import androidx.activity.enableEdgeToEdge
 import com.example.main.model.NfcRepository
 import com.example.main.ui.screens.MyApp
 import com.example.main.ui.theme.MultiScreenNavTemplateTheme
-import com.github.skjolber.ndef.Message
-import com.github.skjolber.ndef.Record
-import com.github.skjolber.ndef.externaltype.AndroidApplicationRecord
-import com.github.skjolber.ndef.wellknown.TextRecord
 
 
 class MainActivity : ComponentActivity() {

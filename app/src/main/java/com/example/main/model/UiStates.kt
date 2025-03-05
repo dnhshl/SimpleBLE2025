@@ -15,6 +15,12 @@ enum class  ConnectionState {
     CONNECTED
 }
 
+enum class NfcState {
+    NFC_NOT_SUPPORTED,
+    NFC_DISABLED,
+    NFC_ENABLED
+}
+
 
 @Serializable
 data class Device(
@@ -35,6 +41,7 @@ data class UiState(
     val devices: List<Device> = emptyList(),
     val selectedDevice: Device? = null,
     val connectionState: ConnectionState = ConnectionState.NO_DEVICE,
+    val nfcState: NfcState = NfcState.NFC_NOT_SUPPORTED,
     val receiveData: Boolean = false,
     val led: Boolean = false,
     val blink: Boolean = false,

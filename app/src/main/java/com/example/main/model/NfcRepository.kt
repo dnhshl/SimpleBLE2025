@@ -1,20 +1,16 @@
 package com.example.main.model
 
-import android.app.Application
-import android.app.PendingIntent
 import android.content.Intent
 import android.nfc.NdefMessage
 import android.nfc.NfcAdapter
 import android.nfc.Tag
-import android.nfc.tech.Ndef
 import android.util.Log
-import com.example.main.MainActivity
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import com.github.skjolber.ndef.Message
 import com.github.skjolber.ndef.Record
 import com.github.skjolber.ndef.externaltype.AndroidApplicationRecord
 import com.github.skjolber.ndef.wellknown.TextRecord
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 
 object NfcRepository {

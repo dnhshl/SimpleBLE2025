@@ -29,4 +29,7 @@
     <string name="noDevices">Keine Geräte gefunden</string>
     <string name="error_nfc_data">Keine gültigen Daten auf der Karte oder Lesefehler</string>
     <string name="nfc_data_received">NFC Daten verarbeitet.</string>
+    <string name="nfc_not_supported">NFC wird nicht unterstützt!</string>
+    <string name="nfc_disabled">NFC ist nicht aktiviert!</string>
+    <string name="nfc_enabled">NFC ist aktiviert!</string>
 </resources>
