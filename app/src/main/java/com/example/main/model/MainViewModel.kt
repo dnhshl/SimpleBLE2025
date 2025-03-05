@@ -195,18 +195,19 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun checkNfcStatus() {
         val nfcAdapter = NfcAdapter.getDefaultAdapter(getApplication())
-        if (nfcAdapter == null) {
-            _state.update { it.copy(nfcState = NfcState.NFC_NOT_SUPPORTED) }
-            showSnackbar(getStringRessource(R.string.nfc_not_supported))
-        } else if (!nfcAdapter.isEnabled) {
-            _state.update { it.copy(nfcState = NfcState.NFC_DISABLED) }
-            showSnackbar(getStringRessource(R.string.nfc_disabled))
-        } else {
-            _state.update { it.copy(nfcState = NfcState.NFC_ENABLED) }
-            showSnackbar(getStringRessource(R.string.nfc_enabled))
+        val nfcState = when {
+            nfcAdapter == null -> NfcState.NFC_NOT_SUPPORTED
+            !nfcAdapter.isEnabled -> NfcState.NFC_DISABLED
+            else -> NfcState.NFC_ENABLED
         }
+        _state.update { it.copy(nfcState = nfcState) }
+        val messageResId = when (nfcState) {
+            NfcState.NFC_NOT_SUPPORTED -> R.string.nfc_not_supported
+            NfcState.NFC_DISABLED -> R.string.nfc_disabled
+            NfcState.NFC_ENABLED -> R.string.nfc_enabled
+        }
+        showSnackbar(getStringRessource(messageResId))
     }
-
 
     // Snackbar
     // ------------------------------------------------------------------------------
