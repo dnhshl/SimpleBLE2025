@@ -1,12 +1,12 @@
 <resources>
-    <string name="app_name">SimpleMQTT</string>
+    <string name="app_name">SimpleNFC</string>
     <string name="mainScreenTitle">Home</string>
     <string name="mainScreenLabel">Home</string>
     <string name="screen2Title">Screen2</string>
     <string name="screen2Label">screen2</string>
     <string name="screen3Title">Screen 3</string>
     <string name="screen3Label">screen3</string>
-    <string name="FullScreen1Title">ESP32 MQTT Communication</string>
+    <string name="FullScreen1Title">ESP32 MQTT + NFC</string>
     <string name="FullScreen2Title">Wähle Device</string>
     <string name="menuItem1">Wähle Device</string>
     <string name="menuItem2">Verbinde</string>
@@ -27,4 +27,6 @@
     <string name="connected">Verbunden</string>
     <string name="noDevice">Kein Gerät ausgewählt</string>
     <string name="noDevices">Keine Geräte gefunden</string>
+    <string name="error_nfc_data">Keine gültigen Daten auf der Karte oder Lesefehler</string>
+    <string name="nfc_data_received">NFC Daten verarbeitet.</string>
 </resources>

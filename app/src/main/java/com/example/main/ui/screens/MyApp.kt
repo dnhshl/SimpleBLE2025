@@ -47,7 +47,10 @@ fun MyApp() {
     val viewModel: MainViewModel = viewModel()
 
 
-    val permissions = listOf(android.Manifest.permission.INTERNET)
+    val permissions = listOf(
+        android.Manifest.permission.INTERNET,
+        android.Manifest.permission.NFC
+    )
 
     // Abfragen mehrerer Berechtigungen
     val multiplePermissionsState = rememberMultiplePermissionsState(permissions = permissions)

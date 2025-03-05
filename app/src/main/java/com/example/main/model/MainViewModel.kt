@@ -2,24 +2,28 @@ package com.example.main.model
 
 import android.app.Application
 import android.content.Context
+import android.nfc.NdefMessage
 import android.util.Log
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.main.R
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 
+val Context.dataStore by preferencesDataStore(name = "ui_state")
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     val snackbarHostState = SnackbarHostState()
-    private val Context.dataStore by preferencesDataStore(name = "ui_state")
+
     private val dataStore = application.dataStore
     private val datastoreManager = DatastoreManager(dataStore)
 
@@ -55,6 +59,27 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             _pState.collectLatest {
                 val pState = _pState.value
                 datastoreManager.savePersitantState(pState)
+            }
+        }
+
+
+        // Überwache den NFC-Datenstrom
+        viewModelScope.launch {
+            NfcRepository.nfcData.collectLatest {  nfcdata ->
+                Log.i(">>>>>", "NFC Data: $nfcdata")
+                nfcdata ?: return@collectLatest
+                try {
+                    val device = Json.decodeFromString<Device>(nfcdata)
+                    _state.update { it.copy(
+                        selectedDevice = device,
+                        connectionState = ConnectionState.NOT_CONNECTED
+                    ) }
+                    showSnackbar(getStringRessource(R.string.nfc_data_received))
+                } catch (e: Exception) {
+                    showSnackbar(getStringRessource(R.string.error_nfc_data))
+                }
+
+                Log.i(">>>>>", "NFC Data: $nfcdata")
             }
         }
 

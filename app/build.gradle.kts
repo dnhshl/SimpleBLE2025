@@ -43,7 +43,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.simplemqtt2025"
+        applicationId = "com.example.simplenfc2025"
         minSdk = 29
         targetSdk = 35
         versionCode = 1
@@ -95,6 +95,7 @@ dependencies {
     implementation(libs.play.services.location)
     implementation(libs.eclipse.paho.mqtt)
     implementation(libs.eclipse.paho.android.service)
+    implementation(libs.ndef.tools.android)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

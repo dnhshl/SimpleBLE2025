@@ -16,6 +16,7 @@ accompanist = "0.37.1"
 playServicesLocation = "21.3.0"
 mqttv3 = "1.1.0"
 pahoAndroidService = "1.1.1"
+ndefToolsForAndroidVersion = '2.0.1'
 
 
 
@@ -46,8 +47,7 @@ accompanist-permissons = { group = "com.google.accompanist", name = "accompanist
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 eclipse-paho-mqtt = { group = "org.eclipse.paho", name = "org.eclipse.paho.client.mqttv3", version.ref = "mqttv3" }
 eclipse-paho-android-service = { group = "org.eclipse.paho", name = "org.eclipse.paho.android.service", version.ref = "pahoAndroidService" }
-
-
+ndef-tools-android = { group = "com.github.skjolber.ndef-tools-for-android", name = "ndeftools", version.ref = "ndefToolsForAndroidVersion" }
 
 
 [plugins]
