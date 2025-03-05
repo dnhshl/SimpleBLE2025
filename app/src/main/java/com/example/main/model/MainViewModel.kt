@@ -13,11 +13,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
+private val Context.dataStore by preferencesDataStore(name = "ui_state")
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     val snackbarHostState = SnackbarHostState()
-    private val Context.dataStore by preferencesDataStore(name = "ui_state")
     private val dataStore = application.dataStore
     private val datastoreManager = DatastoreManager(dataStore)
 
